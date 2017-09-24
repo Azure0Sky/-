@@ -4,6 +4,7 @@
 using namespace std;
 
 vector<int> res;                            //Save the result
+int step = 0;
 
 //Create the matrix according to the rule
 void CreateMatrix( int **matrix, int *num, const int cnt )
@@ -47,6 +48,8 @@ void Dispatch( vector<stack<int>> &buffers, int **matrix, int *num, const int cn
         res.push_back( next++ );
         ++curr;
         out = true;
+        cout << "The number " << next-1 << " is poped from original queue." << endl;
+        ++step;
 
     } else if ( !buffers.empty() ) {        //judge whether to pop
 
@@ -58,27 +61,35 @@ void Dispatch( vector<stack<int>> &buffers, int **matrix, int *num, const int cn
                 res.push_back( next++ );
                 it->pop();
                 out = true;
+
+                cout << "The number " << next-1 << " is poped from stack[" << it-buffers.begin()+1 << ']' << endl;
+                ++step;
             }
         }
 
     } 
 
-    if ( !out ) {                                //to push ( make sure that curr < cnt )
-
-        if ( buffers.empty() )
-            buffers.push_back( stack<int>() );
+    if ( !out ) {                           //to push ( make sure that curr < cnt )
 
         bool isPushed = false;
         for ( auto it = buffers.begin(); it != buffers.end(); ++it ) {
             if ( Push( *it, matrix, num[curr] ) ) {
                 it->push( num[curr] );
                 isPushed = true;
+
+                cout << "The number " << num[curr] << " is pushed into stack[" << it-buffers.begin()+1 << ']' << endl; 
+                ++step;
+
                 break;
             }
         }
 
         if ( !isPushed ) {
             buffers.push_back( stack<int>( {num[curr]} ) );
+
+            cout << "The number " << num[curr] << " is pushed into a new stack[" 
+                 << buffers.end()-buffers.begin() << ']' << endl;
+            ++step;
         }
 
         ++curr;
@@ -125,13 +136,18 @@ int main()
     for ( auto n : res ) {
         cout << n << " ";
     }
-
     cout << endl;
+
+    cout << "The total number of stacks is " << buffers.size() << '.' << endl
+         << "The total number of steps is " << step << '.' << endl;
     
     delete [] num;
     for ( int i = 0; i < cnt; ++i )
         delete [] matrix[i];
     delete [] matrix;
+
+    getchar();
+    getchar();
 
     return 0;
 }
