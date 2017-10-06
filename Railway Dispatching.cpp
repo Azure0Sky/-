@@ -1,8 +1,10 @@
 #include <iostream>
 #include <stack>
 #include <vector>
+#include <algorithm>
 using namespace std;
 
+int *fin;                                   //Save the final sequence
 vector<int> res;                            //Save the result
 int step = 0;
 
@@ -35,7 +37,7 @@ bool Push( stack<int> oneStack, int **matrix, int number )
 }
 
 //Dispatch the trains(numbers)
-//The parameter 'next' represents the number we want next
+//The parameter 'next' represents the index of the number we want next
 //The parameter 'curr' represents the index of the number to be process
 void Dispatch( vector<stack<int>> &buffers, int **matrix, int *num, const int cnt, int curr, int next )
 {
@@ -43,12 +45,12 @@ void Dispatch( vector<stack<int>> &buffers, int **matrix, int *num, const int cn
         return;
 
     bool out = false;                       //whether a number is out
-    if ( curr < cnt && num[curr] == next ) {
+    if ( curr < cnt && num[curr] == fin[next] ) {
 
-        res.push_back( next++ );
+        res.push_back( fin[next++] );
         ++curr;
         out = true;
-        cout << "The number " << next-1 << " is poped from original queue." << endl;
+        cout << "The number " << fin[next-1] << " is poped from original queue." << endl;
         ++step;
 
     } else if ( !buffers.empty() ) {        //judge whether to pop
@@ -57,12 +59,12 @@ void Dispatch( vector<stack<int>> &buffers, int **matrix, int *num, const int cn
             if ( it->empty() )
                 continue;
 
-            if ( it->top() == next ) {
-                res.push_back( next++ );
+            if ( it->top() == fin[next] ) {
+                res.push_back( fin[next++] );
                 it->pop();
                 out = true;
 
-                cout << "The number " << next-1 << " is poped from stack[" << it-buffers.begin()+1 << ']' << endl;
+                cout << "The number " << fin[next-1] << " is poped from stack[" << it-buffers.begin()+1 << ']' << endl;
                 ++step;
             }
         }
@@ -101,18 +103,25 @@ void Dispatch( vector<stack<int>> &buffers, int **matrix, int *num, const int cn
 
 int main()
 {
+    cout << "Input the number of the carriage :" << endl;
     int cnt = 0;
     cin >> cnt;
 
     int *num = new int[cnt];
+    fin = new int[cnt];
 
     int **matrix = new int* [cnt];
     for ( int i = 0; i < cnt; ++i )
         matrix[i] = new int[cnt]();
 
-    for ( int i = 0; i < cnt; ++i )
+    cout << "Input the  original queue, from 1 to n." << endl;
+    cout << "Such as 1 3 2 4." << endl;
+    for ( int i = 0; i < cnt; ++i ) {
         cin >> num[i];
+        fin[i] = num[i];
+    }
     
+    sort( fin, fin+cnt );
     CreateMatrix( matrix, num, cnt );
 
     vector<stack<int>> buffers;
@@ -131,7 +140,7 @@ int main()
     //     cout << endl << endl;
     // }
 
-    Dispatch( buffers, matrix, num, cnt, 0, 1 );
+    Dispatch( buffers, matrix, num, cnt, 0, 0 );
 
     for ( auto n : res ) {
         cout << n << " ";
